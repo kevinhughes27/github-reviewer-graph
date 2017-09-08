@@ -5,10 +5,12 @@ import React from 'react';
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 
-const GetRepositoryInfoQuery = gql`
+import BarChart from 'react-bar-chart';
+
+const Query = gql`
   query {
     repository(owner: "Shopify", name: "partners") {
-      pullRequests(last: 40, states: OPEN) {
+      pullRequests(last: 50) {
         nodes {
           title
           author {
@@ -17,7 +19,14 @@ const GetRepositoryInfoQuery = gql`
           reviewRequests(last: 5) {
             nodes {
               reviewer {
-                name
+                login
+              }
+            }
+          }
+          reviews(last: 5) {
+            nodes {
+              author {
+                login
               }
             }
           }
@@ -27,7 +36,7 @@ const GetRepositoryInfoQuery = gql`
   }
 `;
 
-const withInfo = graphql(GetRepositoryInfoQuery, {
+const withInfo = graphql(Query, {
   props: ({ data }) => {
     // loading state
     if (data.loading) {
@@ -58,12 +67,20 @@ class Graph extends React.Component {
     const pullRequests = repo.pullRequests.nodes;
 
     let reviewCounts = {}
+
     pullRequests.forEach(pr => {
-      const reviewers = pr.reviewRequests.nodes
-      reviewers.forEach(rr => {
-        const name = rr.reviewer.name
-        reviewCounts[name] = reviewCounts[name] || 0
-        reviewCounts[name] += 1
+      const reviewRequests = pr.reviewRequests.nodes;
+      reviewRequests.forEach(rr => {
+        const username = rr.reviewer.login
+        reviewCounts[username] = reviewCounts[username] || 0
+        reviewCounts[username] += 1
+      });
+
+      const reviews = pr.reviews.nodes;
+      reviews.forEach(r => {
+        const username = r.author.login
+        reviewCounts[username] = reviewCounts[username] || 0
+        reviewCounts[username] += 1
       });
     });
 
@@ -74,10 +91,20 @@ class Graph extends React.Component {
 
   render() {
     const reviewers = this.state.reviewers;
+    const margin = {top: 20, right: 20, bottom: 30, left: 40};
+    const data = Object.keys(reviewers).map(username => {
+      return {
+        text: username,
+        value: reviewers[username]
+      };
+    });
 
     return (
       <div>
-        { Object.keys(reviewers).map(r => `${r}: ${reviewers[r]}`) }
+        <BarChart width={1500}
+                  height={500}
+                  margin={margin}
+                  data={data}/>
       </div>
     )
   }
