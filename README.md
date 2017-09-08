@@ -1,10 +1,13 @@
 # Github Reviewer Graph
-Graphing date from Github's Graphql API
+Graphing data from Github's [GraphQL API](https://developer.github.com/v4/)
+
+![](chart.png)
+* real version shows usernames
 
 ## Config
 - Copy `config.default.js` into a file called `config.js`, and add your personal access token
 
-## Develop
+## Developing
 ```sh
 yarn start
 ```
