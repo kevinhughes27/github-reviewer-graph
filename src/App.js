@@ -7,10 +7,10 @@ import ApolloClient, { createNetworkInterface } from 'apollo-client'
 
 // Auth
 import { login } from './githubLogin'
-import { username, password } from './config'
+import { username, password, otp } from './config'
 
 // App.Components
-import Repository from './repository'
+import Graph from './Graph'
 
 // Global.Auth
 let TOKEN = null
@@ -47,20 +47,20 @@ export default class App extends Component {
     if (username === 'xxx') {
       throw new Error('Please create a config.js your username and password.')
     }
-    login(username, password).then(token => {
+    login(username, password, otp).then(token => {
       TOKEN = token
       this.setState({ login: true })
     })
   }
 
-  routeForRepository (login, name) {
-    return {
-      title: `${login}/${name}`,
-      component: Repository,
-      login,
-      name
-    }
-  }
+  // routeForRepository (login, name) {
+  //   return {
+  //     title: `${login}/${name}`,
+  //     component: Repository,
+  //     login,
+  //     name
+  //   }
+  // }
 
   render () {
     // Log in state
@@ -71,7 +71,7 @@ export default class App extends Component {
     // Logged in, fetch from Github
     return this.state.login
       ? <ApolloProvider client={client}>
-        <Repository {...this.routeForRepository('facebook', 'react')} />
+        <Graph />
       </ApolloProvider>
       : <p>Logging in...</p>
   }

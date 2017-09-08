@@ -6,14 +6,21 @@ import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 
 const GetRepositoryInfoQuery = gql`
-  query GetRepositoryIssues($name: String!, $login: String!) {
-    repositoryOwner(login: $login) {
-      repository(name: $name) {
-        stargazers {
-          totalCount
-        }
-        watchers {
-          totalCount
+  query {
+    repository(owner: "Shopify", name: "partners") {
+      pullRequests(last: 40, states: OPEN) {
+        nodes {
+          title
+          author {
+            login
+          }
+          reviewRequests(last: 5) {
+            nodes {
+              reviewer {
+                name
+              }
+            }
+          }
         }
       }
     }
@@ -46,21 +53,19 @@ const withInfo = graphql(GetRepositoryInfoQuery, {
 });
 
 // Repository
-class Repository extends React.Component {
+class Graph extends React.Component {
   constructor(props) {
     super(props);
 
     // states
     this.state = {
-      login: props.login,
-      name: props.name,
-      stargazers: 0,
-      watchers: 0,
+      reviewers: []
     };
   }
 
   componentWillReceiveProps(newProps) {
     // DRY
+    debugger
     const repo = newProps.data.repositoryOwner.repository;
 
     // states
@@ -83,5 +88,5 @@ class Repository extends React.Component {
   }
 }
 
-const RepositoryWithInfo = withInfo(Repository);
-export default RepositoryWithInfo;
+const GraphWithData = withInfo(Graph);
+export default GraphWithData;

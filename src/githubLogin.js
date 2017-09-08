@@ -7,7 +7,7 @@ const config = {
 
 const AUTH_URL_PATH = 'https://api.github.com/authorizations'
 
-export function login (name, pwd) {
+export function login (name, pwd, otp) {
   const bytes = name.trim() + ':' + pwd.trim()
   const encoded = base64.encode(bytes)
 
@@ -15,6 +15,7 @@ export function login (name, pwd) {
     method: 'POST',
     headers: {
       Authorization: 'Basic ' + encoded,
+      'X-GitHub-OTP': otp,
       'User-Agent': 'GitHub Issue Browser',
       'Content-Type': 'application/json; charset=utf-8',
       Accept: 'application/vnd.github.inertia-preview+json'
