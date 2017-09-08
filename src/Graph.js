@@ -5,7 +5,6 @@ import React from 'react';
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 
-import _filter from 'lodash/filter';
 import _sortBy from 'lodash/sortBy';
 
 var BarStackChart = require('react-d3-basic').BarStackChart;
@@ -14,7 +13,6 @@ const repos = [
   'partners',
   'shopify',
   'billing',
-  'appsStore',
   'experts'
 ]
 
@@ -28,9 +26,6 @@ const Query = gql`
         ...repoFields
       }
       billing: repository(name: "billing") {
-        ...repoFields
-      }
-      appsStore: repository(name: "shopify-app-store") {
         ...repoFields
       }
       experts: repository(name: "talent-store") {
@@ -58,6 +53,9 @@ const Query = gql`
           nodes {
             author {
               login
+            }
+            comments {
+              totalCount
             }
           }
         }
@@ -103,15 +101,20 @@ class Graph extends React.Component {
         const reviewRequests = pr.reviewRequests.nodes;
         reviewRequests.forEach(rr => {
           const username = rr.reviewer.login
-          reviewers[username] = reviewers[username] || { pending: 0, completed: 0 }
-          reviewers[username]['pending'] += 1
+          if (username !== pr.author.login) {
+            reviewers[username] = reviewers[username] || { pending: 0, completed: 0, comments: 0 }
+            reviewers[username]['pending'] += 1
+          }
         });
 
         const reviews = pr.reviews.nodes;
         reviews.forEach(r => {
           const username = r.author.login
-          reviewers[username] = reviewers[username] || { pending: 0, completed: 0 }
-          reviewers[username]['completed'] += 1
+          if (username !== pr.author.login) {
+            reviewers[username] = reviewers[username] || { pending: 0, completed: 0, comments: 0 }
+            reviewers[username]['completed'] += 1
+            reviewers[username]['comments'] += r.comments.totalCount
+          }
         });
       });
     });
@@ -127,10 +130,11 @@ class Graph extends React.Component {
       return {
         name: username,
         pending: reviewers[username]['pending'],
-        completed: reviewers[username]['completed']
+        completed: reviewers[username]['completed'],
+        comments: reviewers[username]['comments']
       };
     });
-    const sortedData = _sortBy(data, d => -(d.pending + d.completed))
+    const sortedData = _sortBy(data, d => -(d.pending + d.completed + d.comments))
     const topReviewers = sortedData.slice(0, 20)
 
     const chartSeries = [
@@ -141,6 +145,10 @@ class Graph extends React.Component {
       {
         field: 'completed',
         name: 'Completed'
+      },
+      {
+        field: 'comments',
+        name: 'Comments'
       },
     ]
 
