@@ -1,5 +1,5 @@
 # Github Reviewer Graph
-Graphing data from Github's [GraphQL API](https://developer.github.com/v4/)
+Graphing the number of reviews by user across several repos using Github's [GraphQL API](https://developer.github.com/v4/)
 
 ![](chart.png)
 * real version shows usernames
