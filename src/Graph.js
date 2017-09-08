@@ -5,12 +5,12 @@ import React from 'react';
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 
-import BarChart from 'react-bar-chart';
+var BarStackChart = require('react-d3-basic').BarStackChart;
 
 const Query = gql`
   query {
     repository(owner: "Shopify", name: "partners") {
-      pullRequests(last: 50) {
+      pullRequests(last: 100) {
         nodes {
           title
           author {
@@ -66,45 +66,61 @@ class Graph extends React.Component {
     const repo = newProps.data.repository;
     const pullRequests = repo.pullRequests.nodes;
 
-    let reviewCounts = {}
+    let reviewers = {}
 
     pullRequests.forEach(pr => {
       const reviewRequests = pr.reviewRequests.nodes;
       reviewRequests.forEach(rr => {
         const username = rr.reviewer.login
-        reviewCounts[username] = reviewCounts[username] || 0
-        reviewCounts[username] += 1
+        reviewers[username] = reviewers[username] || { pending: 0, completed: 0 }
+        reviewers[username]['pending'] += 1
       });
 
       const reviews = pr.reviews.nodes;
       reviews.forEach(r => {
         const username = r.author.login
-        reviewCounts[username] = reviewCounts[username] || 0
-        reviewCounts[username] += 1
+        reviewers[username] = reviewers[username] || { pending: 0, completed: 0 }
+        reviewers[username]['completed'] += 1
       });
     });
 
     this.setState({
-      reviewers: reviewCounts
+      reviewers: reviewers
     });
   }
 
   render() {
     const reviewers = this.state.reviewers;
-    const margin = {top: 20, right: 20, bottom: 30, left: 40};
     const data = Object.keys(reviewers).map(username => {
       return {
-        text: username,
-        value: reviewers[username]
+        name: username,
+        pending: reviewers[username]['pending'],
+        completed: reviewers[username]['completed']
       };
     });
+    const filteredData = data.filter(d => d.pending > 1 || d.completed > 1)
+
+    const chartSeries = [
+      {
+        field: 'pending',
+        name: 'Pending'
+      },
+      {
+        field: 'completed',
+        name: 'Completed'
+      },
+    ]
 
     return (
-      <div>
-        <BarChart width={1500}
-                  height={500}
-                  margin={margin}
-                  data={data}/>
+      <div style={{textAlign: 'center'}}>
+        <h2>Code reviews</h2>
+        <BarStackChart
+          data={filteredData}
+          chartSeries={chartSeries}
+          x={(d) => d.name}
+          xScale={"ordinal"}
+          width={1500}
+          height={500} />
       </div>
     )
   }
