@@ -18,7 +18,7 @@ networkInterface.use([
   {
     applyMiddleware (req, next) {
       if (!req.options.headers) {
-        req.options.headers = {} // Create the header object if needed.
+        req.options.headers = {}
       }
 
       // Send the login token in the Authorization header
@@ -32,7 +32,6 @@ const client = new ApolloClient({
   networkInterface
 })
 
-// App
 export default class App extends Component {
   render () {
     return (

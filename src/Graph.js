@@ -7,7 +7,7 @@ import { graphql } from 'react-apollo';
 
 import _sortBy from 'lodash/sortBy';
 
-var BarStackChart = require('react-d3-basic').BarStackChart;
+const BarStackChart = require('react-d3-basic').BarStackChart;
 
 const repos = [
   'partners',
