@@ -1,5 +1,5 @@
 {
-  "name": "react-apollo-graphql-github-example",
+  "name": "github-reviewer-graph",
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
@@ -19,8 +19,5 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": "./node_modules/react-scripts/config/eslint.js"
   }
 }
