@@ -5,6 +5,9 @@ import React from 'react';
 import gql from 'graphql-tag';
 import { graphql } from 'react-apollo';
 
+import _filter from 'lodash/filter';
+import _sortBy from 'lodash/sortBy';
+
 var BarStackChart = require('react-d3-basic').BarStackChart;
 
 const Query = gql`
@@ -98,7 +101,8 @@ class Graph extends React.Component {
         completed: reviewers[username]['completed']
       };
     });
-    const filteredData = data.filter(d => d.pending > 1 || d.completed > 1)
+    const filteredData = _filter(data, d => d.pending > 1 || d.completed > 1)
+    const sortedData = _sortBy(filteredData, d => -(d.pending + d.completed))
 
     const chartSeries = [
       {
@@ -115,7 +119,7 @@ class Graph extends React.Component {
       <div style={{textAlign: 'center'}}>
         <h2>Code reviews</h2>
         <BarStackChart
-          data={filteredData}
+          data={sortedData}
           chartSeries={chartSeries}
           x={(d) => d.name}
           xScale={"ordinal"}
